@@ -1,8 +1,8 @@
 # OpenAI Agents SDK Tool Usage Demo
 
-This is a beginner demo of an OpenAI Agents SDK agent that can call a Python function as a tool.
+This is a beginner demo of OpenAI Agents SDK agents that can use different tool types.
 
-The agent answers course FAQ questions. When the question needs course-specific information, the model can call the `search_course_faq` tool, read the matching local FAQ entry, and then answer the user.
+The first agent answers course FAQ questions with a local Python function tool. The other demos let you try hosted tools: web search, code interpreter, and tool search.
 
 ## Mental Model
 
@@ -17,6 +17,18 @@ You
 
 The important idea: the model does not already know the local course policy. The tool gives the agent a controlled way to fetch that information.
 
+Hosted tools work a little differently:
+
+```text
+You
+  -> Python script
+  -> Agents SDK Runner
+  -> Agent
+  -> hosted OpenAI tool
+```
+
+Those tools run through the OpenAI Responses API. `WebSearchTool` searches the web, `CodeInterpreterTool` runs code in a hosted sandbox, and `ToolSearchTool` lets the model load deferred tools only when needed.
+
 ## Setup
 
 ```bash
@@ -30,6 +42,8 @@ Then edit `.env` and set:
 OPENAI_API_KEY=your_api_key_here
 OPENAI_MODEL=gpt-4.1-mini
 ```
+
+If a hosted tool returns a model-support error, switch `OPENAI_MODEL` to a current OpenAI Responses model that supports hosted tools.
 
 ## Run
 
@@ -55,10 +69,36 @@ When the tool is used, you will see a line like:
 
 That print statement is only for teaching. It makes tool usage visible in the terminal.
 
+## Hosted Tool Demos
+
+Try web search:
+
+```bash
+uv run python src/web_search_demo.py "Search the web and summarize the latest OpenAI Agents SDK tool categories."
+```
+
+Try code interpreter:
+
+```bash
+uv run python src/code_interpreter_demo.py "Use code to analyze these quiz scores: 78, 92, 88, 73, 95, 84."
+```
+
+Try tool search:
+
+```bash
+uv run python src/tool_search_demo.py "For student stu_101, check progress and recommend what they should do next."
+```
+
+`ToolSearchTool` is different from the other two. It does not answer the user by itself. It searches for deferred tools that the agent can load. In this demo, the searchable tools are grouped under the `course_admin` namespace.
+
 ## Files
 
 - `src/course_assistant.py` creates and runs the agent.
 - `src/course_tools.py` defines the `search_course_faq` tool with `@function_tool`.
+- `src/web_search_demo.py` demonstrates `WebSearchTool`.
+- `src/code_interpreter_demo.py` demonstrates `CodeInterpreterTool`.
+- `src/tool_search_demo.py` demonstrates `ToolSearchTool` with deferred function tools.
+- `src/demo_helpers.py` contains shared setup and terminal output helpers.
 - `sample_docs/course_faq.json` contains the local knowledge base.
 
 ## Verify Syntax
