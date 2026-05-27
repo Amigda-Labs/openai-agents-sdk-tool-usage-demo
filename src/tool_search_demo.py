@@ -1,14 +1,40 @@
 from __future__ import annotations
 
+import os
 from typing import Annotated
+
+from dotenv import load_dotenv
 
 from agents import Agent, Runner, ToolSearchTool, function_tool, tool_namespace
 
-from demo_helpers import load_model_name, parse_question, print_run_result
+from demo_helpers import parse_question, print_run_result
 
 DEFAULT_QUESTION = (
-    "For student stu_101, check progress and recommend what they should do next."
+    "For student stu_202, check progress, find the tool-usage resources they need, "
+    "and recommend what they should do next."
 )
+DEFAULT_TOOL_SEARCH_MODEL = "gpt-5.5"
+
+
+def load_tool_search_model() -> str:
+    load_dotenv()
+
+    if not os.getenv("OPENAI_API_KEY"):
+        raise RuntimeError("OPENAI_API_KEY is missing. Copy .env.example to .env and fill it in.")
+
+    model = os.getenv("TOOL_SEARCH_MODEL")
+    if model:
+        return model
+
+    configured_model = os.getenv("OPENAI_MODEL")
+    if configured_model and configured_model != "gpt-4.1-mini":
+        return configured_model
+
+    print(
+        f"[setup] ToolSearchTool is not supported with gpt-4.1-mini; "
+        f"using {DEFAULT_TOOL_SEARCH_MODEL} for this demo."
+    )
+    return DEFAULT_TOOL_SEARCH_MODEL
 
 
 @function_tool(defer_loading=True)
@@ -41,6 +67,22 @@ def list_course_resources(
 
 
 @function_tool(defer_loading=True)
+def get_week_topic(
+    week_number: Annotated[int, "Course week number, for example 1, 2, 3, or 4."],
+) -> str:
+    """Fetch the main topic for a course week."""
+    print(f"[tool] get_week_topic called with week_number: {week_number}")
+
+    schedule = {
+        1: "Week 1 covers setup and prompt basics.",
+        2: "Week 2 covers structured outputs and validation.",
+        3: "Week 3 covers tool usage with the OpenAI Agents SDK.",
+        4: "Week 4 covers final project demos and feedback.",
+    }
+    return schedule.get(week_number, f"No topic is configured for week {week_number}.")
+
+
+@function_tool(defer_loading=True)
 def recommend_next_step(
     student_id: Annotated[str, "Student id, for example stu_101 or stu_202."],
     topic: Annotated[str, "Topic the recommendation should focus on."],
@@ -54,23 +96,31 @@ def recommend_next_step(
     )
 
 
-course_admin_tools = tool_namespace(
-    name="course_admin",
-    description="Course administration tools for student progress, resources, and next-step recommendations.",
-    tools=[get_student_progress, list_course_resources, recommend_next_step],
+course_progress_tools = tool_namespace(
+    name="course_progress",
+    description="Student progress and next-step recommendation tools.",
+    tools=[get_student_progress, recommend_next_step],
+)
+
+course_content_tools = tool_namespace(
+    name="course_content",
+    description="Course content tools for weekly topics and learning resources.",
+    tools=[get_week_topic, list_course_resources],
 )
 
 
 def build_agent() -> Agent:
     return Agent(
         name="ToolSearchDemo",
-        model=load_model_name(),
+        model=load_tool_search_model(),
         instructions=(
             "You are demonstrating ToolSearchTool. "
-            "First search for and load the right course_admin tools, then call the loaded tools. "
+            "First search for and load the right tool namespaces, then call the loaded tools. "
+            "Use course_progress for student status and recommendations. "
+            "Use course_content for week topics and learning resources. "
             "Explain which tools were useful in one short final answer."
         ),
-        tools=[*course_admin_tools, ToolSearchTool()],
+        tools=[*course_progress_tools, *course_content_tools, ToolSearchTool()],
     )
 
 

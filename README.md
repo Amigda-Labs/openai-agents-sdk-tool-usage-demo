@@ -41,9 +41,11 @@ Then edit `.env` and set:
 ```bash
 OPENAI_API_KEY=your_api_key_here
 OPENAI_MODEL=gpt-4.1-mini
+TOOL_SEARCH_MODEL=gpt-5.5
 ```
 
 If a hosted tool returns a model-support error, switch `OPENAI_MODEL` to a current OpenAI Responses model that supports hosted tools.
+`ToolSearchTool` is stricter than the other demos, so `src/tool_search_demo.py` uses `TOOL_SEARCH_MODEL` and defaults to `gpt-5.5` when `OPENAI_MODEL` is still `gpt-4.1-mini`.
 
 ## Run
 
@@ -86,10 +88,12 @@ uv run python src/code_interpreter_demo.py "Use code to analyze these quiz score
 Try tool search:
 
 ```bash
-uv run python src/tool_search_demo.py "For student stu_101, check progress and recommend what they should do next."
+uv run python src/tool_search_demo.py "For student stu_202, check progress, find the tool-usage resources they need, and recommend what they should do next."
 ```
 
-`ToolSearchTool` is different from the other two. It does not answer the user by itself. It searches for deferred tools that the agent can load. In this demo, the searchable tools are grouped under the `course_admin` namespace.
+`ToolSearchTool` is different from the other two. It does not answer the user by itself. It searches for deferred tools that the agent can load. In this demo, the searchable tools are grouped into the `course_progress` and `course_content` namespaces.
+
+For a fuller explanation of run items, namespaces, and when to use tool search, open `docs/tool_search_explained.html` in a browser.
 
 ## Files
 

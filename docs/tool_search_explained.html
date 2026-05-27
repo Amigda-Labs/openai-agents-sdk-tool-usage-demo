@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ToolSearchTool Explained</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #101418;
+        --panel: #171d23;
+        --panel-2: #202832;
+        --text: #edf2f7;
+        --muted: #aeb8c4;
+        --accent: #46c2a0;
+        --accent-2: #8db6ff;
+        --border: #2d3744;
+        --code: #0b1015;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      main {
+        width: min(1080px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 42px 0 64px;
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.18;
+        margin: 0;
+      }
+
+      h1 {
+        max-width: 760px;
+        font-size: clamp(2rem, 5vw, 4.25rem);
+        letter-spacing: 0;
+      }
+
+      h2 {
+        margin-top: 44px;
+        font-size: clamp(1.45rem, 3vw, 2.1rem);
+      }
+
+      h3 {
+        margin-top: 24px;
+        font-size: 1.12rem;
+      }
+
+      p {
+        max-width: 780px;
+        margin: 14px 0 0;
+        color: var(--muted);
+      }
+
+      a {
+        color: var(--accent-2);
+      }
+
+      code {
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: var(--code);
+        padding: 0.13rem 0.32rem;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.92em;
+      }
+
+      pre {
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--code);
+        padding: 16px;
+        color: #d7e5f0;
+      }
+
+      pre code {
+        border: 0;
+        background: transparent;
+        padding: 0;
+      }
+
+      ul,
+      ol {
+        margin: 14px 0 0;
+        padding-left: 1.35rem;
+        color: var(--muted);
+      }
+
+      li + li {
+        margin-top: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-2);
+        color: var(--text);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .lead {
+        max-width: 820px;
+        margin-top: 18px;
+        font-size: 1.13rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 16px;
+        border: 1px solid rgba(70, 194, 160, 0.45);
+        border-radius: 999px;
+        padding: 6px 11px;
+        color: var(--accent);
+        background: rgba(70, 194, 160, 0.08);
+        font-size: 0.88rem;
+        font-weight: 650;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+      }
+
+      .card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .card p {
+        margin-top: 8px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .flow div {
+        min-height: 92px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 14px;
+      }
+
+      .flow strong {
+        display: block;
+        color: var(--text);
+      }
+
+      .flow span {
+        display: block;
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+
+      .callout {
+        margin-top: 18px;
+        border-left: 4px solid var(--accent);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 16px 18px;
+      }
+
+      .callout p {
+        margin-top: 0;
+      }
+
+      .small {
+        font-size: 0.94rem;
+      }
+
+      @media (max-width: 840px) {
+        .grid,
+        .flow {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="badge">OpenAI Agents SDK Hosted Tool Search</span>
+      <h1>ToolSearchTool is a tool finder, not the business tool.</h1>
+      <p class="lead">
+        It lets the model search a declared tool catalog at runtime, load the relevant tool
+        definitions, and then call only the tools needed for the current request.
+      </p>
+
+      <section>
+        <h2>What happened in our demo</h2>
+        <p>
+          The demo now declares two namespaces. Think of each namespace as a toolbox with a label
+          and a short description.
+        </p>
+        <div class="grid">
+          <div class="card">
+            <h3><code>course_progress</code></h3>
+            <p>Tools for student status and recommendations.</p>
+            <ul>
+              <li><code>get_student_progress</code></li>
+              <li><code>recommend_next_step</code></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3><code>course_content</code></h3>
+            <p>Tools for week topics and learning resources.</p>
+            <ul>
+              <li><code>get_week_topic</code></li>
+              <li><code>list_course_resources</code></li>
+            </ul>
+          </div>
+        </div>
+        <p>
+          For the default prompt, the model needs both toolboxes: progress data from
+          <code>course_progress</code> and learning-resource data from <code>course_content</code>.
+        </p>
+      </section>
+
+      <section>
+        <h2>End-to-end flow</h2>
+        <div class="flow">
+          <div>
+            <strong>1. User prompt</strong>
+            <span>Ask about student progress, resources, and next action.</span>
+          </div>
+          <div>
+            <strong>2. Tool search</strong>
+            <span>The model asks to load relevant namespaces.</span>
+          </div>
+          <div>
+            <strong>3. Load tools</strong>
+            <span>The API returns the function schemas inside those namespaces.</span>
+          </div>
+          <div>
+            <strong>4. Execute tools</strong>
+            <span>The model calls only the functions it needs.</span>
+          </div>
+          <div>
+            <strong>5. Final answer</strong>
+            <span>The assistant writes from actual tool outputs.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Run items</h2>
+        <p>
+          The <code>Run items</code> section is not from the model response text. It comes from the
+          Agents SDK <code>RunResult.new_items</code> list. Our helper in
+          <code>src/demo_helpers.py</code> loops through that list and prints a readable trace of
+          what happened.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Run item</th>
+              <th>Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>tool_search_call_item</code></td>
+              <td>The model asked tool search to load one or more paths/namespaces.</td>
+            </tr>
+            <tr>
+              <td><code>tool_search_output_item</code></td>
+              <td>The hosted tool search returned the tool definitions that were loaded.</td>
+            </tr>
+            <tr>
+              <td><code>tool_call_item</code></td>
+              <td>The model actually called a loaded function tool.</td>
+            </tr>
+            <tr>
+              <td><code>tool_call_output_item</code></td>
+              <td>Your Python function returned output back to the model.</td>
+            </tr>
+            <tr>
+              <td><code>message_output_item</code></td>
+              <td>The model wrote the final assistant message.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout">
+          <p>
+            Tool search does not execute every function to find the best one. It searches names,
+            descriptions, namespace descriptions, and schemas. Real execution only happens when a
+            later <code>tool_call_item</code> appears.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Multiple toolboxes</h2>
+        <p>
+          Yes, you can have multiple toolboxes. In the Agents SDK, that means multiple
+          <code>tool_namespace(...)</code> calls. You still add only one <code>ToolSearchTool()</code>
+          to the agent.
+        </p>
+        <pre><code>course_progress_tools = tool_namespace(
+    name="course_progress",
+    description="Student progress and next-step recommendation tools.",
+    tools=[get_student_progress, recommend_next_step],
+)
+
+course_content_tools = tool_namespace(
+    name="course_content",
+    description="Course content tools for weekly topics and learning resources.",
+    tools=[get_week_topic, list_course_resources],
+)
+
+agent = Agent(
+    name="ToolSearchDemo",
+    model="gpt-5.5",
+    tools=[
+        *course_progress_tools,
+        *course_content_tools,
+        ToolSearchTool(),
+    ],
+)</code></pre>
+        <p>
+          Do not add one <code>ToolSearchTool()</code> per namespace. The SDK validates hosted tool
+          search as one search tool with one or more searchable surfaces.
+        </p>
+      </section>
+
+      <section>
+        <h2>When to use it</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Good fit</h3>
+            <ul>
+              <li>You have many tools or large schemas.</li>
+              <li>Tools are naturally grouped by domain, such as CRM, billing, or course content.</li>
+              <li>You want lower tool-schema token usage per turn.</li>
+              <li>You want to defer hosted MCP servers or namespace groups until needed.</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Probably unnecessary</h3>
+            <ul>
+              <li>You only have two or three simple tools.</li>
+              <li>Every user request always needs the same tools.</li>
+              <li>You are teaching basic function tools for the first time.</li>
+              <li>Your target model does not support <code>tool_search</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Try it</h2>
+        <pre><code>uv run python src/tool_search_demo.py</code></pre>
+        <p>
+          If your <code>OPENAI_MODEL</code> is <code>gpt-4.1-mini</code>, this demo uses
+          <code>TOOL_SEARCH_MODEL=gpt-5.5</code> because the API rejects
+          <code>tool_search</code> with <code>gpt-4.1-mini</code>.
+        </p>
+      </section>
+
+      <section>
+        <h2>References</h2>
+        <ul class="small">
+          <li>
+            <a href="https://openai.github.io/openai-agents-python/tools/">Agents SDK tools docs</a>
+          </li>
+          <li>
+            <a href="https://developers.openai.com/api/docs/guides/tools-tool-search"
+              >OpenAI API tool search guide</a
+            >
+          </li>
+          <li><code>src/tool_search_demo.py</code></li>
+          <li><code>src/demo_helpers.py</code></li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
