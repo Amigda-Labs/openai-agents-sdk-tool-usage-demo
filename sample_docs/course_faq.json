@@ -1,0 +1,22 @@
+[
+  {
+    "topic": "late_submissions",
+    "title": "Late Submission Policy",
+    "content": "Assignments submitted within 24 hours after the deadline can still receive full credit if the student includes a short note explaining the delay. Assignments submitted 1 to 3 days late have a maximum score of 80 percent. Assignments more than 3 days late need instructor approval before they are graded."
+  },
+  {
+    "topic": "grading",
+    "title": "Grading Breakdown",
+    "content": "The final grade is based on weekly exercises worth 40 percent, the final project worth 40 percent, and participation worth 20 percent. Participation includes asking questions, joining discussions, and completing short check-ins."
+  },
+  {
+    "topic": "schedule",
+    "title": "Course Schedule",
+    "content": "Week 1 covers setup and prompt basics. Week 2 covers structured outputs and validation. Week 3 covers tool usage with the OpenAI Agents SDK. Week 4 covers final project demos and feedback."
+  },
+  {
+    "topic": "support",
+    "title": "Getting Help",
+    "content": "Students should ask questions in the class chat first. If the question includes private information or a personal blocker, students can email the instructor. Office hours are every Friday from 3 PM to 4 PM."
+  }
+]
